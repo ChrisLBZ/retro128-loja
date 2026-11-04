@@ -6,6 +6,7 @@
  * o que estava visível na vitrine durante a contagem.
  */
 
+const LIMITE_HISTORICO = 60;
 const historicoContador = [];
 
 function formatarTempo(ms) {
@@ -31,10 +32,13 @@ function iniciarContador(campanha) {
     const restante = Math.max(0, fim - Date.now());
     historicoContador.push({
       instante: Date.now(),
-      restante: restante,
-      jogos: JOGOS.map((jogo) => ({ ...jogo })),
-      vitrine: vitrine.cloneNode(true)
+      restante,
+      jogosVisiveis: vitrine.querySelectorAll('.card').length
     });
+
+    if (historicoContador.length > LIMITE_HISTORICO) {
+      historicoContador.shift();
+    }
     Observabilidade.contar('contador_ticks');
     alvo.innerHTML = formatarTempo(restante);
   }
@@ -43,5 +47,5 @@ function iniciarContador(campanha) {
   Observabilidade.info('CONTADOR_INICIADO', 'Contador da Black Friday ativo', {
     fim: campanha.fim, intervalo: campanha.intervaloContadorSegundos
   });
-  return setInterval(tick, campanha.intervaloContadorSegundos);
+  return setInterval(tick, campanha.intervaloContadorSegundos * 1000);
 }
